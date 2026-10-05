@@ -1,0 +1,47 @@
+{
+  "kind": "rumo-effect",
+  "formatVersion": 1,
+  "name": "RGB Split",
+  "description": "Chromatic aberration: red and blue are pulled apart towards the edges while the centre stays sharp, with a soft vignette on top. Two sliders, one pass.",
+  "createdBy": "sysrv64",
+  "appVersionCode": 1,
+  "createdAt": 1791200000000,
+  "effect": {
+    "id": "rgb_split",
+    "label": "RGB Split",
+    "space": "display",
+    "passes": [
+      {
+        "entry": "fs_main",
+        "shrink": 0
+      }
+    ],
+    "params": [
+      {
+        "key": "amount",
+        "label": "Split",
+        "kind": "float",
+        "min": 0.0,
+        "max": 0.06,
+        "default": [
+          0.012
+        ],
+        "unit": "",
+        "choices": []
+      },
+      {
+        "key": "vignette",
+        "label": "Vignette",
+        "kind": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": [
+          0.35
+        ],
+        "unit": "",
+        "choices": []
+      }
+    ],
+    "source": "// RGB Split -- a project-defined effect, and the example published to the Shop.\n//\n// Red is read a little further from the frame centre and blue a little closer,\n// while green stays put. The displacement grows with distance from the centre,\n// so the middle of the frame stays sharp and the edges fringe -- which is what\n// a cheap lens actually does, and it is why the amount is a fraction of the\n// centre-to-corner vector rather than a constant offset.\n//\n// Colour maths is in display space (gamma-encoded 0..1), like every built-in:\n// the compositor works on Rgba8Unorm targets. Layer textures are straight\n// alpha, so the alpha of the untouched sample is carried through unchanged.\n\nstruct Frame {\n    size: vec2<f32>,\n    time: f32,\n    pass_index: f32,\n    texel_input: vec2<f32>,\n    texel_origin: vec2<f32>,\n};\n\n@group(0) @binding(0) var input_tex: texture_2d<f32>;\n@group(0) @binding(1) var input_smp: sampler;\n@group(0) @binding(2) var<uniform> frame: Frame;\n@group(0) @binding(3) var origin_tex: texture_2d<f32>;\n\nstruct Params {\n    amount: f32,\n    vignette: f32,\n};\n\n@group(1) @binding(0) var<uniform> params: Params;\n\n// Explicit LOD keeps the sample legal outside a derivative-uniform context,\n// and the clamp keeps the edge from wrapping around to the far side.\nfn sample_at(uv: vec2<f32>) -> vec4<f32> {\n    return textureSampleLevel(input_tex, input_smp, clamp(uv, vec2<f32>(0.0), vec2<f32>(1.0)), 0.0);\n}\n\n@fragment\nfn fs_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {\n    let centre = vec2<f32>(0.5, 0.5);\n    let base = sample_at(uv);\n    let offset = (uv - centre) * params.amount;\n    let r = sample_at(uv + offset).r;\n    let b = sample_at(uv - offset).b;\n    let d = dot(uv - centre, uv - centre);\n    let falloff = clamp(1.0 - params.vignette * d * 2.0, 0.0, 1.0);\n    return vec4<f32>(vec3<f32>(r, base.g, b) * falloff, base.a);\n}\n"
+  }
+}
