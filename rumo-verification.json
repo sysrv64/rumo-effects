@@ -3,10 +3,22 @@
   "formatVersion": 1,
   "producedBy": "Rumo 0.0.1 (host checker)",
   "appVersionCode": 1,
-  "checkedAt": "2026-10-05T06:30:35Z",
+  "checkedAt": "2026-10-05T06:53:48Z",
   "items": [
     {
-      "id": "rgb-split",
+      "id": "crt_scanlines",
+      "kind": "effect",
+      "ok": true,
+      "checks": [
+        "naga parsed and validated the WGSL module",
+        "five bindings, no vertex stage",
+        "struct Params spans 16 bytes: lines, depth, wobble, vignette",
+        "one fragment entry point: fs_main",
+        "declared parameter order matches the struct"
+      ]
+    },
+    {
+      "id": "rgb_split",
       "kind": "effect",
       "ok": true,
       "checks": [
@@ -15,8 +27,8 @@
         "struct Params spans 8 bytes: amount, vignette",
         "one fragment entry point: fs_main",
         "declared parameter order matches the struct"
-      ],
-      "note": "Checked with the engine's own WGSL validator, not by the app on a device. The app re-checks on install."
+      ]
     }
-  ]
+  ],
+  "note": "Checked with the engine's own WGSL validator, not by the app on a device. The app re-checks on install."
 }

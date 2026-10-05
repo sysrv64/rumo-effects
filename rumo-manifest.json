@@ -4,10 +4,21 @@
   "author": "sysrv64",
   "items": [
     {
-      "id": "rgb-split",
+      "id": "crt_scanlines",
+      "kind": "effect",
+      "name": "CRT Scanlines",
+      "description": "Old tube: dark bands between phosphor rows, a horizontal wobble that drifts, and a vignette. Visible on a flat colour.",
+      "version": "1.0.0",
+      "targetAppVersionCode": 1,
+      "minAppVersionCode": 1,
+      "file": "effects/crt-scanlines.rumoeffect",
+      "preview": "previews/crt-scanlines.webp"
+    },
+    {
+      "id": "rgb_split",
       "kind": "effect",
       "name": "RGB Split",
-      "description": "Chromatic aberration: red and blue are pulled apart towards the edges while the centre stays sharp, with a soft vignette on top.",
+      "description": "Chromatic aberration: red and blue are pulled apart towards the edges while the centre stays sharp, with a soft vignette. Needs texture detail to show -- on a flat colour it is invisible.",
       "version": "1.0.0",
       "targetAppVersionCode": 1,
       "minAppVersionCode": 1,

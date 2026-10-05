@@ -9,8 +9,26 @@ Example repository for the **Effects** section of the Rumo shop. It carries the
 |---|---|
 | `rumo-manifest.json` | what this repository offers: name, version, which Rumo it is for, where the files are |
 | `rumo-verification.json` | the result of Rumo's own check that the content works |
-| `effects/rgb-split.rumoeffect` | the effect itself |
-| `previews/rgb-split.webp` | the small picture shown in the shop list |
+| `effects/crt-scanlines.rumoeffect` | effect 1 |
+| `effects/rgb-split.rumoeffect` | effect 2 |
+| `previews/*.webp` | the small pictures shown in the shop list |
+
+### CRT Scanlines
+
+Dark bands between phosphor rows, a horizontal wobble that grows towards the
+edges and drifts with time, and a vignette.
+
+| Parameter | Range | Default |
+|---|---|---|
+| Lines | 20 – 600 | 220 |
+| Depth | 0 – 1 | 0.5 |
+| Wobble | 0 – 0.03 | 0.006 |
+| Vignette | 0 – 1 | 0.45 |
+
+**This is the one to try first if you want to know whether a custom effect runs
+at all**: all three of its parts are visible on a flat colour, so a shape layer
+shows them. RGB Split does not — chromatic aberration needs texture detail, and
+a shape layer is one flat colour.
 
 ### RGB Split
 
@@ -21,7 +39,7 @@ parameter darkens the corners.
 
 | Parameter | Range | Default |
 |---|---|---|
-| Split | 0 – 0.06 | 0.012 |
+| Split | 0 – 0.06 | 0.02 |
 | Vignette | 0 – 1 | 0.35 |
 
 One pass, no downscale, so it costs one full-resolution draw.

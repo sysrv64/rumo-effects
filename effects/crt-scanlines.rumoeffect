@@ -1,0 +1,71 @@
+{
+  "kind": "rumo-effect",
+  "formatVersion": 1,
+  "name": "CRT Scanlines",
+  "description": "Old tube: dark bands between phosphor rows, a horizontal wobble that drifts, and a vignette. Visible on a flat colour, so it is the quickest way to check that a custom effect runs at all.",
+  "createdBy": "sysrv64",
+  "appVersionCode": 1,
+  "createdAt": 1791200000000,
+  "effect": {
+    "id": "crt_scanlines",
+    "label": "CRT Scanlines",
+    "space": "display",
+    "passes": [
+      {
+        "entry": "fs_main",
+        "shrink": 0
+      }
+    ],
+    "params": [
+      {
+        "key": "lines",
+        "label": "Lines",
+        "kind": "float",
+        "min": 20.0,
+        "max": 600.0,
+        "default": [
+          220.0
+        ],
+        "unit": "",
+        "choices": []
+      },
+      {
+        "key": "depth",
+        "label": "Depth",
+        "kind": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": [
+          0.5
+        ],
+        "unit": "",
+        "choices": []
+      },
+      {
+        "key": "wobble",
+        "label": "Wobble",
+        "kind": "float",
+        "min": 0.0,
+        "max": 0.03,
+        "default": [
+          0.006
+        ],
+        "unit": "",
+        "choices": []
+      },
+      {
+        "key": "vignette",
+        "label": "Vignette",
+        "kind": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": [
+          0.45
+        ],
+        "unit": "",
+        "choices": []
+      }
+    ],
+    "source": "// CRT Scanlines -- a project-defined effect, and the second example published\n// to the Shop.\n//\n// Three things happen, and all three are visible on a flat colour, which is why\n// this one exists next to RGB Split: chromatic aberration needs texture detail\n// to show at all, and a shape layer is one flat colour.\n//\n//   * dark bands between phosphor rows,\n//   * a horizontal wobble that grows towards the edges and drifts with time,\n//   * a vignette.\n//\n// Colour maths is in display space (gamma-encoded 0..1), like every built-in,\n// and the layer's own alpha is carried through so a transparent pixel stays\n// transparent instead of turning into a dark band.\n\nstruct Frame {\n    size: vec2<f32>,\n    time: f32,\n    pass_index: f32,\n    texel_input: vec2<f32>,\n    texel_origin: vec2<f32>,\n};\n\n@group(0) @binding(0) var input_tex: texture_2d<f32>;\n@group(0) @binding(1) var input_smp: sampler;\n@group(0) @binding(2) var<uniform> frame: Frame;\n@group(0) @binding(3) var origin_tex: texture_2d<f32>;\n\nstruct Params {\n    lines: f32,\n    depth: f32,\n    wobble: f32,\n    vignette: f32,\n};\n\n@group(1) @binding(0) var<uniform> params: Params;\n\nfn sample_at(uv: vec2<f32>) -> vec4<f32> {\n    return textureSampleLevel(input_tex, input_smp, clamp(uv, vec2<f32>(0.0), vec2<f32>(1.0)), 0.0);\n}\n\n@fragment\nfn fs_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {\n    let centre = vec2<f32>(0.5, 0.5);\n    // A tube that is not quite straight: the further from the middle column, the\n    // more the row shifts, and the shift drifts over time.\n    let shift = sin(uv.y * 24.0 + frame.time * 2.5) * params.wobble * abs(uv.x - 0.5) * 2.0;\n    let c = sample_at(vec2<f32>(uv.x + shift, uv.y));\n    // Zero in the middle of a row, one at the gap between rows.\n    let line = abs(fract(uv.y * params.lines) - 0.5) * 2.0;\n    let shade = 1.0 - params.depth * line;\n    let d = dot(uv - centre, uv - centre);\n    let vig = clamp(1.0 - params.vignette * d * 2.0, 0.0, 1.0);\n    return vec4<f32>(c.rgb * shade * vig, c.a);\n}\n"
+  }
+}
